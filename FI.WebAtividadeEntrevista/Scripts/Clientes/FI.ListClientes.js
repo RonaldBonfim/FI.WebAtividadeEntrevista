@@ -51,7 +51,10 @@ $(document).ready(function () {
             data: { id: id },
             success: function (result) {
                 ModalDialog("Sucesso", result);
-                location.reload();
+
+                setTimeout(function () {
+                    location.reload();
+                }, 2000);
             },
             error: function (error) {
                 ModalDialog("Erro", "Erro ao alterar cliente. Detalhes: " + error.responseJSON);
