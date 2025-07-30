@@ -23,7 +23,7 @@ namespace WebAtividadeEntrevista.Controllers
 
         [HttpPost]
         public JsonResult Incluir(ClienteModel model)
-        { 
+        {
             try
             {
                 if (!this.ModelState.IsValid)
@@ -32,28 +32,18 @@ namespace WebAtividadeEntrevista.Controllers
                                           from error in item.Errors
                                           select error.ErrorMessage).ToList();
 
-                    Response.StatusCode = 400;
-
-                    return Json(string.Join(Environment.NewLine, erros));
+                    throw new Exception(string.Join("<br/>", erros));
                 }
 
                 BoCliente boCliente = new BoCliente();
 
                 if (boCliente.VerificarExistencia(model.CPF))
-                {
-                    Response.StatusCode = 400;
-
-                    return Json(new { Result = "ERROR", Message = string.Format("Já existe cliente cadastrado de CPF: {0}", model.CPF) });
-                }
+                    throw new Exception(string.Format("Já existe cliente cadastrado de CPF: {0}", model.CPF));
 
                 List<string> cpfsRepetidos = model.Beneficiarios.GroupBy(x => x.CPF).Where(y => y.Count() > 1).Select(z => z.Key).ToList();
 
                 if (cpfsRepetidos.Any())
-                {
-                    Response.StatusCode = 400;
-
-                    return Json(new { Result = "ERROR", Message = $"Existem beneficiários com o mesmo CPF: {string.Join(", ", cpfsRepetidos)}" });
-                }
+                    throw new Exception($"Existem beneficiários com o mesmo CPF: {string.Join(", ", cpfsRepetidos)}");
 
                 Cliente cliente = new Cliente()
                 {
@@ -90,7 +80,7 @@ namespace WebAtividadeEntrevista.Controllers
                     }
                 }
 
-                return Json("Cadastro efetuado com sucesso!");
+                return Json("O Cliente foi incluído com sucesso!");
             }
             catch (Exception ex)
             {
@@ -103,21 +93,33 @@ namespace WebAtividadeEntrevista.Controllers
         [HttpPost]
         public JsonResult Alterar(ClienteModel model)
         {
-            BoCliente boCliente = new BoCliente();
-
-            if (!this.ModelState.IsValid)
+            try
             {
-                List<string> erros = (from item in ModelState.Values
-                                      from error in item.Errors
-                                      select error.ErrorMessage).ToList();
+                if (!this.ModelState.IsValid)
+                {
+                    List<string> erros = (from item in ModelState.Values
+                                          from error in item.Errors
+                                          select error.ErrorMessage).ToList();
 
-                Response.StatusCode = 400;
+                    throw new Exception(string.Join("<br/>", erros));
+                }
 
-                return Json(string.Join(Environment.NewLine, erros));
-            }
-            else
-            {
-                boCliente.Alterar(new Cliente()
+                List<string> cpfsRepetidos = model.Beneficiarios.GroupBy(x => x.CPF).Where(y => y.Count() > 1).Select(z => z.Key).ToList();
+
+                if (cpfsRepetidos.Any())
+                    throw new Exception($"Existem beneficiários com o mesmo CPF: {string.Join(", ", cpfsRepetidos)}");
+
+                BoBeneficiario boBeneficiario = new BoBeneficiario();
+
+                List<Beneficiario> beneficiarioList = boBeneficiario.ListarPorCliente(model.Id);
+
+                foreach (Beneficiario beneficiario in beneficiarioList)
+                {
+                    if (model.Beneficiarios.Find(x => x.CPF == beneficiario.CPF && x.Id != beneficiario.Id) != null)
+                        throw new Exception(string.Format("Beneficiário de CPF: {0} já está cadastrado para este cliente!", beneficiario.CPF));
+                }
+
+                Cliente cliente = new Cliente()
                 {
                     Id = model.Id,
                     CEP = model.CEP,
@@ -128,22 +130,70 @@ namespace WebAtividadeEntrevista.Controllers
                     Nacionalidade = model.Nacionalidade,
                     Nome = model.Nome,
                     Sobrenome = model.Sobrenome,
-                    Telefone = model.Telefone
-                });
+                    Telefone = model.Telefone,
+                    CPF = model.CPF
+                };
+
+                BoCliente boCliente = new BoCliente();
+
+                boCliente.Alterar(cliente);
+
+                if (model.Beneficiarios.Count > 0)
+                {
+                    foreach (BeneficiarioModel beneficiarioModel in model.Beneficiarios)
+                    {
+                        if (beneficiarioModel == null)
+                            continue;
+
+                        if (beneficiarioModel.Id > 0)
+                        {
+                            Beneficiario beneficiario = new Beneficiario()
+                            {
+                                Id = beneficiarioModel.Id.Value,
+                                ClienteId = model.Id,
+                                Nome = beneficiarioModel.Nome,
+                                CPF = beneficiarioModel.CPF
+                            };
+
+                            boBeneficiario.Alterar(beneficiario);
+                        }
+                        else
+                        {
+                            Beneficiario beneficiario = new Beneficiario()
+                            {
+                                ClienteId = model.Id,
+                                Nome = beneficiarioModel.Nome,
+                                CPF = beneficiarioModel.CPF
+                            };
+
+                            beneficiarioModel.Id = boBeneficiario.Incluir(beneficiario);
+                        }
+                    }
+                }
 
                 return Json("Cadastro alterado com sucesso!");
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = 400;
+
+                return Json(ex.Message);
             }
         }
 
         [HttpGet]
         public ActionResult Alterar(long id)
         {
-            BoCliente bo = new BoCliente();
-            Cliente cliente = bo.Consultar(id);
+            BoCliente boCliente = new BoCliente();
+
+            Cliente cliente = boCliente.Consultar(id);
+
             ClienteModel model = null;
 
             if (cliente != null)
             {
+                List<Beneficiario> beneficiarioList = new BoBeneficiario().ListarPorCliente(id);
+
                 model = new ClienteModel()
                 {
                     Id = cliente.Id,
@@ -155,11 +205,61 @@ namespace WebAtividadeEntrevista.Controllers
                     Nacionalidade = cliente.Nacionalidade,
                     Nome = cliente.Nome,
                     Sobrenome = cliente.Sobrenome,
-                    Telefone = cliente.Telefone
+                    Telefone = cliente.Telefone,
+                    CPF = cliente.CPF,
+                    Beneficiarios = beneficiarioList.Select(beneficiario => new BeneficiarioModel
+                    {
+                        Id = beneficiario.Id,
+                        CPF = beneficiario.CPF,
+                        Nome = beneficiario.Nome
+                    }).ToList()
                 };
             }
 
             return View(model);
+        }
+
+        [HttpPost]
+        public ActionResult Deletar(long id)
+        {
+            try
+            {
+                List<Beneficiario> beneficiarioList = new BoBeneficiario().ListarPorCliente(id);
+
+                if (beneficiarioList != null && beneficiarioList.Count > 0)
+                    throw new Exception(string.Format("Não é possível excluir, existem beneficiários vinculados ao cliente"));
+
+                BoCliente boCliente = new BoCliente();
+
+                boCliente.Excluir(id);
+
+                return Json("Cliente excluído com sucesso!");
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = 400;
+
+                return Json(ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public ActionResult DeletarBeneficiario(long id)
+        {
+            try
+            {
+                BoBeneficiario boBeneficiario = new BoBeneficiario();
+
+                boBeneficiario.Excluir(id);
+
+                return Json("Beneficiário excluído com sucesso!");
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = 400;
+
+                return Json(string.Format("Não foi possível deletar o beneficiário: {0}", ex.Message));
+            }
         }
 
         [HttpPost]

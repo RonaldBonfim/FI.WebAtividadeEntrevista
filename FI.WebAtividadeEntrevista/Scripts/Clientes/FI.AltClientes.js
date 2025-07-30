@@ -1,5 +1,9 @@
 ﻿
 $(document).ready(function () {
+    $('#CPF').mask('000.000.000-00', { reverse: true });
+    $('#CPFBeneficiario').mask('000.000.000-00', { reverse: true });
+    $('#Telefone').mask('(00) 00000-0000');
+
     if (obj) {
         $('#formCadastro #Nome').val(obj.Nome);
         $('#formCadastro #CEP').val(obj.CEP);
@@ -10,39 +14,72 @@ $(document).ready(function () {
         $('#formCadastro #Cidade').val(obj.Cidade);
         $('#formCadastro #Logradouro').val(obj.Logradouro);
         $('#formCadastro #Telefone').val(obj.Telefone);
+        $('#formCadastro #CPF').val(obj.CPF);
     }
+
+    $('#listaBeneficiarios tbody').empty();
+
+    $.each(obj.Beneficiarios, function (index, beneficiario) {
+        var novaLinha = `
+                    <tr>
+                    <td class="hidden-xs hidden">${beneficiario.Id}</td>
+                    <td>${formatarCpf(beneficiario.CPF)}</td>
+                    <td>${beneficiario.CPF}</td>
+                    <td>${beneficiario.Nome}</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-primary btnAlterarBeneficiario" style="margin-right: 0.4rem">Alterar</button>
+                        <button type="button" class="btn btn-sm btn-danger btnExcluirBeneficiario">Excluir</button>
+                    </td>
+                </tr>
+                `;
+
+        $('#listaBeneficiarios tbody').append(novaLinha);
+    });
 
     $('#formCadastro').submit(function (e) {
         e.preventDefault();
-        
-        $.ajax({
-            url: urlPost,
-            method: "POST",
-            data: {
-                "NOME": $(this).find("#Nome").val(),
-                "CEP": $(this).find("#CEP").val(),
-                "Email": $(this).find("#Email").val(),
-                "Sobrenome": $(this).find("#Sobrenome").val(),
-                "Nacionalidade": $(this).find("#Nacionalidade").val(),
-                "Estado": $(this).find("#Estado").val(),
-                "Cidade": $(this).find("#Cidade").val(),
-                "Logradouro": $(this).find("#Logradouro").val(),
-                "Telefone": $(this).find("#Telefone").val()
-            },
-            error:
-            function (r) {
-                if (r.status == 400)
-                    ModalDialog("Ocorreu um erro", r.responseJSON);
-                else if (r.status == 500)
-                    ModalDialog("Ocorreu um erro", "Ocorreu um erro interno no servidor.");
-            },
-            success:
-            function (r) {
-                ModalDialog("Sucesso!", r)
-                $("#formCadastro")[0].reset();                                
-                window.location.href = urlRetorno;
-            }
-        });
+        alterarCliente();
     })
-    
 })
+
+function alterarCliente() {
+    var cliente = {
+        Nome: $('#formCadastro #Nome').val(),
+        Sobrenome: $('#formCadastro #Sobrenome').val(),
+        CPF: $('#formCadastro #CPF').val(),
+        Nacionalidade: $('#formCadastro #Nacionalidade').val(),
+        CEP: $('#formCadastro #CEP').val(),
+        Estado: $('#formCadastro #Estado').val(),
+        Cidade: $('#formCadastro #Cidade').val(),
+        Logradouro: $('#formCadastro #Logradouro').val(),
+        Email: $('#formCadastro #Email').val(),
+        Telefone: $('#formCadastro #Telefone').val(),
+        Beneficiarios: []
+    };
+
+    $('#listaBeneficiarios tbody tr').each(function () {
+        var beneficiario = {
+            Id: $(this).find('td:eq(0)').text().trim(),
+            CPF: $(this).find('td:eq(1)').text().trim(),
+            Nome: $(this).find('td:eq(2)').text().trim()
+        };
+        cliente.Beneficiarios.push(beneficiario);
+    });
+
+    $.ajax({
+        url: urlPost,
+        type: 'POST',
+        data: JSON.stringify(cliente),
+        contentType: 'application/json',
+        success: function (result) {
+            const modalId = ModalDialog("Sucesso", result);
+
+            $('#' + modalId).on('hidden.bs.modal', function () {
+                window.location.href = urlRetorno;
+            });
+        },
+        error: function (error) {
+            ModalDialog("Erro", "Erro ao alterar cliente. Detalhes: " + error);
+        }
+    });
+}
