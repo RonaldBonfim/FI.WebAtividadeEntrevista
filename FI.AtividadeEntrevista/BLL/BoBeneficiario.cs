@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
-using FI.AtividadeEntrevista.DAL.Beneficiarios;
+﻿using FI.AtividadeEntrevista.DAL.Beneficiarios;
+using FI.AtividadeEntrevista.DML;
+using System.Collections.Generic;
 
 namespace FI.AtividadeEntrevista.BLL
 {
@@ -9,7 +10,7 @@ namespace FI.AtividadeEntrevista.BLL
         /// Inclui um novo Beneficiario
         /// </summary>
         /// <param name="beneficiario">Objeto de beneficiario</param>
-        public long Incluir(DML.Beneficiario beneficiario)
+        public long Incluir(Beneficiario beneficiario)
         {
             DaoBeneficiario daoBeneficiario = new DaoBeneficiario();
             return daoBeneficiario.Incluir(beneficiario);
@@ -18,7 +19,7 @@ namespace FI.AtividadeEntrevista.BLL
         /// <summary>
         /// Lista os beneficiario
         /// </summary>
-        public List<DML.Beneficiario> ListarPorCliente(long clienteId)
+        public List<Beneficiario> ListarPorCliente(long clienteId)
         {
             DaoBeneficiario daoBeneficiario = new DaoBeneficiario();
             return daoBeneficiario.ListarPorCliente(clienteId);
@@ -28,7 +29,7 @@ namespace FI.AtividadeEntrevista.BLL
         /// Altera um beneficiario
         /// </summary>
         /// <param name="beneficiario">Objeto de beneficiario</param>
-        public void Alterar(DML.Beneficiario beneficiario)
+        public void Alterar(Beneficiario beneficiario)
         {
             DaoBeneficiario daoBeneficiario = new DaoBeneficiario();
             daoBeneficiario.Alterar(beneficiario);

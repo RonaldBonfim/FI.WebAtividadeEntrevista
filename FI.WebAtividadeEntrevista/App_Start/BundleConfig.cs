@@ -30,7 +30,7 @@ namespace FI.WebAtividadeEntrevista
                       "~/Scripts/jtable/localization/jquery.jtable.pt-BR.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/clientes").Include(
-                      "~/Scripts/Clientes/FI.Clientes.js"));
+                      "~/Scripts/Clientes/FI.Clientes.js", "~/Scripts/Utilities/FI.Utils.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/listClientes").Include(
                       "~/Scripts/Clientes/FI.ListClientes.js"));
@@ -39,8 +39,7 @@ namespace FI.WebAtividadeEntrevista
                       "~/Scripts/Clientes/FI.AltClientes.js"));
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
-                      "~/Content/bootstrap.css",
-                      "~/Content/site.css"));
+                      "~/Content/bootstrap.css", "~/Content/site.css"));
 
             bundles.Add(new StyleBundle("~/Content/jtable").Include(
                       "~/Scripts/jtable/themes/metro/darkgray/jtable.css"));

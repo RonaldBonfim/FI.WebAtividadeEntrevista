@@ -8,7 +8,7 @@ $(document).ready(function () {
     $('#formCadastro').submit(function (event) {
         event.preventDefault();
         incluirClientes();
-    });    
+    });
 })
 
 function incluirClientes() {
@@ -50,7 +50,8 @@ function incluirClientes() {
         },
         error: function (error) {
             const response = JSON.parse(error.responseText);
-            ModalDialog("Erro", "Não foi possível incluir o cliente. Detalhes: " + response.Message);
+
+            ModalDialog("Erro", "Não foi possível incluir o cliente. Detalhes: <br/>" + response);
         }
     });
 }
