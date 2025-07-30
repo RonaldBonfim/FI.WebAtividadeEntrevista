@@ -14,16 +14,19 @@ $(document).ready(function () {
         $('#formCadastro #Cidade').val(obj.Cidade);
         $('#formCadastro #Logradouro').val(obj.Logradouro);
         $('#formCadastro #Telefone').val(obj.Telefone);
-        $('#formCadastro #CPF').val(obj.CPF);
+        $('#formCadastro #CPF').val(obj.CPF).mask('000.000.000-00');
     }
 
     $('#listaBeneficiarios tbody').empty();
 
     $.each(obj.Beneficiarios, function (index, beneficiario) {
+
+        const novoCpf = cpfFormatado(beneficiario.CPF);
+
         var novaLinha = `
                     <tr>
                     <td class="hidden-xs hidden">${beneficiario.Id}</td>
-                    <td>${beneficiario.CPF}</td>
+                    <td>${novoCpf}</td>
                     <td>${beneficiario.Nome}</td>
                     <td class="text-center">
                         <button type="button" class="btn btn-sm btn-primary btnAlterarBeneficiario" style="margin-right: 0.4rem">Alterar</button>
@@ -83,4 +86,12 @@ function alterarCliente() {
             ModalDialog("Erro", "Erro ao alterar cliente. Detalhes: <br/>" + response);
         }
     });
+}
+
+function cpfFormatado(cpf) {
+    cpf = cpf.replace(/\D/g, '');
+
+    cpf = cpf.slice(0, 11);
+
+    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
 }
