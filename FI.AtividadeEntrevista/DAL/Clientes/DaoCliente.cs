@@ -14,7 +14,7 @@ namespace FI.AtividadeEntrevista.DAL
         /// Inclui um novo cliente
         /// </summary>
         /// <param name="cliente">Objeto de cliente</param>
-        internal long Incluir(DML.Cliente cliente)
+        internal long Incluir(Cliente cliente)
         {
             List<System.Data.SqlClient.SqlParameter> parametros = new List<System.Data.SqlClient.SqlParameter>();
 
@@ -39,14 +39,14 @@ namespace FI.AtividadeEntrevista.DAL
         /// Inclui um novo cliente
         /// </summary>
         /// <param name="cliente">Objeto de cliente</param>
-        internal DML.Cliente Consultar(long Id)
+        internal Cliente Consultar(long Id)
         {
             List<System.Data.SqlClient.SqlParameter> parametros = new List<System.Data.SqlClient.SqlParameter>();
 
             parametros.Add(new System.Data.SqlClient.SqlParameter("Id", Id));
 
             DataSet ds = base.Consultar("FI_SP_ConsCliente", parametros);
-            List<DML.Cliente> cli = Converter(ds);
+            List<Cliente> cli = Converter(ds);
 
             return cli.FirstOrDefault();
         }
@@ -103,7 +103,7 @@ namespace FI.AtividadeEntrevista.DAL
         /// Inclui um novo cliente
         /// </summary>
         /// <param name="cliente">Objeto de cliente</param>
-        internal void Alterar(DML.Cliente cliente)
+        internal void Alterar(Cliente cliente)
         {
             List<System.Data.SqlClient.SqlParameter> parametros = new List<System.Data.SqlClient.SqlParameter>();
 
@@ -135,14 +135,14 @@ namespace FI.AtividadeEntrevista.DAL
             base.Executar("FI_SP_DelCliente", parametros);
         }
 
-        private List<DML.Cliente> Converter(DataSet ds)
+        private List<Cliente> Converter(DataSet ds)
         {
-            List<DML.Cliente> lista = new List<DML.Cliente>();
+            List<Cliente> lista = new List<DML.Cliente>();
             if (ds != null && ds.Tables != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
             {
                 foreach (DataRow row in ds.Tables[0].Rows)
                 {
-                    DML.Cliente cli = new DML.Cliente();
+                    Cliente cli = new Cliente();
                     cli.Id = row.Field<long>("Id");
                     cli.CEP = row.Field<string>("CEP");
                     cli.Cidade = row.Field<string>("Cidade");
