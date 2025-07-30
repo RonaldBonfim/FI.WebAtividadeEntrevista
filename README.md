@@ -1,9 +1,6 @@
 Teste Prático – Vaga de Desenvolvedor
 Este repositório contém a solução desenvolvida para o teste prático técnico para avaliação de conhecimentos na vaga de desenvolvedor.
 
-Objetivo
-O objetivo deste teste é avaliar o conhecimento técnico e a lógica de desenvolvimento do candidato, com base em requisitos específicos aplicados a um sistema de cadastro de clientes.
-
 Requisitos Técnicos
 Visual Studio 2022 (preferencialmente com os seguintes pacotes instalados):
 
