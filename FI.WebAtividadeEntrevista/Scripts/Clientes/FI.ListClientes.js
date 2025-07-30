@@ -50,7 +50,7 @@ $(document).ready(function () {
             type: 'POST',
             data: { id: id },
             success: function (result) {
-                ModalDialog("Sucesso", response.responseJSON);
+                ModalDialog("Sucesso", result);
                 location.reload();
             },
             error: function (error) {

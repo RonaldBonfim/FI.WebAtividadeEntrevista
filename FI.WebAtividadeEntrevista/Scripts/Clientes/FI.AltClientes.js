@@ -23,7 +23,6 @@ $(document).ready(function () {
         var novaLinha = `
                     <tr>
                     <td class="hidden-xs hidden">${beneficiario.Id}</td>
-                    <td>${formatarCpf(beneficiario.CPF)}</td>
                     <td>${beneficiario.CPF}</td>
                     <td>${beneficiario.Nome}</td>
                     <td class="text-center">
@@ -79,7 +78,9 @@ function alterarCliente() {
             });
         },
         error: function (error) {
-            ModalDialog("Erro", "Erro ao alterar cliente. Detalhes: " + error);
+            const response = JSON.parse(error.responseText);
+
+            ModalDialog("Erro", "Erro ao alterar cliente. Detalhes: <br/>" + response);
         }
     });
 }

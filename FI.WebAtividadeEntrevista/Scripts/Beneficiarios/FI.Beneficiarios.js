@@ -4,7 +4,7 @@ $(document).ready(function () {
         const nome = $('#NomeBeneficiario').val().trim();
 
         if (!cpf || !nome) {
-            ModalDialog("Erro", "Preencha todos os campos do beneficiário");
+            ModalDialog("Erro", "Preencha todos os campos do beneficiario");
             return;
         }
 
@@ -37,15 +37,12 @@ $(document).ready(function () {
                     method: 'POST',
                     data: { id: id },
                     success: function (response) {
-                        if (response.Result === "OK") {
-                            linha.remove();
-                            ModalDialog("Sucesso", response.Message);
-                        } else {
-                            ModalDialog("Erro", response.Message);
-                        }
+                        linha.remove();
+                        ModalDialog("Sucesso", response);
+
                     },
-                    error: function () {
-                        ModalDialog("Erro", "Erro ao excluir beneficiário.");
+                    error: function (error) {
+                        ModalDialog("Erro", error.responseJSON);
                     }
                 });
             }

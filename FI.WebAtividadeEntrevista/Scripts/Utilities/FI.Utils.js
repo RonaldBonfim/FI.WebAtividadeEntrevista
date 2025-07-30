@@ -20,6 +20,8 @@ function ModalDialog(titulo, texto) {
 
     $('body').append(texto);
     $('#' + random).modal('show');
+
+    return random;
 }
 
 function formatarCPF(cpf) {    
